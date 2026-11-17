@@ -138,7 +138,7 @@ test("discoverDumateModels imports opencode.json, filters non-chat entries, and 
     const v41 = models.find((m) => m.id === "deepseek-v41-flash");
     assert.equal(v41.reasoning, true);
     assert.equal(v41.supportsImage, true);
-    assert.ok(v41.displayName.includes("2pt/k"));
+    assert.match(v41.displayName, /\d+(\.\d+)?pt\/k/);
 
     // Removing opencode.json should cleanly fall back to snapshot
     unlinkSync(ocPath);

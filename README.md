@@ -9,7 +9,39 @@
 - **动态模型清单**：自动读取桌面端 `opencode.json` (`provider.QianfanPersonalQuota.models`) 中的对话模型元数据（支持 `qwen4-max`、`deepseek-v41-flash`、`glm-53`、`kimi-k31` 等），并原子保存快照至 `~/.dsh/dumate-models.snapshot.json` 兜底。
 - **进程内 Loopback Shim + 官方 `PiAiAdapter`**：在插件内绑定 `127.0.0.1:0` 临时端口并校验 32 字节随机进程内 Bearer Secret，由 DSH 官方 `PiAiAdapter` 完整接管**真 SSE 流式、Tool Calling（函数/工具调用）、多模态图片输入、401 自动换票重试与断开即中止**。
 - **V4.1 思考强度映射**：针对 `deepseek-v41-flash` 等 V4.1 后端模型正确映射 `off` / `low` / `high` / `max` 思考开关，其他模型安全剥离无效 `reasoning_effort`。
-- **DSH 设置面板**：在 **设置 → 百度搭子** 及插件配置卡片中查看拆分后的 DuMate 独立积分池（过滤共享产品与未生效订阅期）、每日一键签到 / 启动自动签到、模型启用勾选与积分倍率显示开关（已按 `2026-11-18` 实测校准倍率表，如 `kimi-k31` 已从早期 `0.117 pt/k` 上调至 `31.19 pt/k` out、`kimi-k3` `6.235 pt/k` out、`glm-53` / `deepseek-v4-pro` / `qwen38-flash` 约 `0.1 pt/k`）。
+- **DSH 设置面板**：在 **设置 → 百度搭子** 及插件配置卡片中查看拆分后的 DuMate 独立积分池（过滤共享产品与未生效订阅期）、每日一键签到 / 启动自动签到、模型启用勾选与积分倍率显示开关（已按 `2026-11-18` 全量双点实测校准全模型倍率，可运行 `pnpm measure:rates` 按当前账号实时复测）。
+
+## 2026-11-18 全模型实测积分倍率表
+
+以下费率通过 `scripts/measure-rates.mjs` 对 `https://dumate-svc.baidu.com/gateway/apis/v1/chat/completions` 执行短/长两档输出双点斜率法实测并校准（按实测输出单价从高到低排序）：
+
+| 模型 ID | 显示名称 | 实际后端 (`x-dumate-gw-realmodel`) | 实测输出单价 (`pt/k`) |
+| :--- | :--- | :--- | :--- |
+| `kimi-k31` | Kimi K3.1 Pro | `kimi-k3.1-pro` | `31.26` |
+| `dm-auto-model/text.L1` | 自动·文本 L1 | `kimi-k3` | `9.99` |
+| `kimi-k3` | Kimi K3 | `kimi-k3` | `6.23` |
+| `dm-auto-model/text.L2` | 自动·文本 L2 | `qwen3.8-max` | `3.06` |
+| `ernie-4.5-turbo-vl-32k` | 文心 ERNIE-4.5 Turbo VL | `deepseek-v4.1-flash-low-latency-1017` | `2.02` |
+| `deepseek-v41-flash` | DeepSeek-V4.1 Flash | `deepseek-v4.1-flash-low-latency-1017` | `2.01` |
+| `deepseek-v4-flash-0731` | DeepSeek-V4-Flash-0731 | `deepseek-v4.1-flash-low-latency-1017` | `2.01` |
+| `dm-auto-model/text.L0` | 自动·文本 L0 | `deepseek-v4.1-flash-low-latency-1017` | `2.01` |
+| `dm-auto-model/mm.L2` | 自动·多模态 L2 | `deepseek-v4.1-flash-low-latency-1017` | `2.01` |
+| `dm-auto-model/mm.L0` | 自动·多模态 L0 | `deepseek-v4.1-flash-low-latency-1017` | `1.99` |
+| `dm-auto-model/mm.L1` | 自动·多模态 L1 | `deepseek-v4.1-flash-low-latency-1017` | `1.97` |
+| `model-text` | 自动路由 (默认) | `deepseek-v4.1-flash-low-latency-1017` | `1.97` |
+| `qwen2.5-vl-32b-instruct` | Qwen2.5-VL-32B | `deepseek-v4.1-flash-low-latency-1017` | `1.97` |
+| `qwen3.8-max` | Qwen3.8-Max | `qwen3.8-max` | `1.89` |
+| `doubao-seed-2-0-pro` | 豆包 Seed 2.0 Pro | `doubao-seed-2-0-pro-260215` | `0.197` |
+| `glm-53` | GLM-5.3 | `glm-5.3` | `0.111` |
+| `glm-53-flash` | GLM-5.3 Flash | `glm-5.3-flash` | `0.111` |
+| `qwen38-flash` | Qwen3.8-Flash | `qwen3.8-flash` | `0.104` |
+| `deepseek-v4-pro` | DeepSeek-V4 Pro | `deepseek-v4-pro-0813` | `0.102` |
+| `qwen3.5-397b-a17b` | Qwen3.5-397B-A17B | `qwen3.8-flash` | `0.101` |
+| `qwen3.5-27b` | Qwen3.5-27B | `qwen3.5-27b` | `0.058` |
+| `qwen3.5-35b-a3b` | Qwen3.5-35B-A3B | `n2p5sdmw_qwen35-35b-a3b` | `0.042` |
+| `qwen4-max` | Qwen4-Max | — | 暂未标价（网关返回 HTTP 400 `required headers invalid`） |
+
+> 注：`glm-5` 当前未出现在本地配置快照模型列表中，保留历史回退值 `2.0 pt/k`。部分路由/兼容别名当前指向 `deepseek-v4.1-flash-low-latency-1017` 或 `qwen3.8-flash`，实际计费可能随百度搭子服务端动态调整，建议定期运行 `pnpm measure:rates` 校准。
 
 ---
 

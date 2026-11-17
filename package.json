@@ -31,8 +31,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "check": "node --check lib/index.js && node --check lib/dumate-auth.js && node --check lib/dumate-catalog.js && node --check lib/dumate-shim.js && node --check lib/client.js",
-    "test": "node --test test/plugin.test.mjs"
+    "check": "node --check lib/index.js && node --check lib/dumate-auth.js && node --check lib/dumate-catalog.js && node --check lib/dumate-shim.js && node --check lib/client.js && node --check scripts/measure-rates.mjs",
+    "test": "node --test test/plugin.test.mjs",
+    "measure:rates": "node scripts/measure-rates.mjs"
   },
   "repository": {
     "type": "git",
