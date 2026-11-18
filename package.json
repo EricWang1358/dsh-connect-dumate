@@ -6,9 +6,11 @@
   "author": "EricWang1358",
   "license": "MIT",
   "keywords": [
+    "dsh",
     "dsh-plugin",
     "deepseek-harness",
     "dumate",
+    "qianfan",
     "baidu",
     "model-provider",
     "points"
@@ -31,8 +33,10 @@
     "LICENSE"
   ],
   "scripts": {
-    "check": "node --check lib/index.js && node --check lib/dumate-auth.js && node --check lib/dumate-catalog.js && node --check lib/dumate-shim.js && node --check lib/client.js && node --check scripts/measure-rates.mjs",
+    "check": "node --check lib/index.js && node --check lib/dumate-auth.js && node --check lib/dumate-catalog.js && node --check lib/dumate-shim.js && node --check lib/client.js && node --check scripts/measure-rates.mjs && node --check scripts/check-pii.mjs",
+    "check:pii": "node scripts/check-pii.mjs",
     "test": "node --test test/plugin.test.mjs",
+    "prepublishOnly": "npm run check && npm run check:pii && npm run test",
     "measure:rates": "node scripts/measure-rates.mjs"
   },
   "repository": {
@@ -44,7 +48,8 @@
     "url": "https://github.com/EricWang1358/dsh-connect-dumate/issues"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "dsh": {
     "bundle": {
